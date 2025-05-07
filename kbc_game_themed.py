@@ -172,6 +172,6 @@ if __name__ == "__main__":
     main()
 
 
-# Save to file
+# #Save to file
 with open("/mnt/data/kbc_game_themed.py", "w") as f:
     f.write(kbc_game_themed.strip())
