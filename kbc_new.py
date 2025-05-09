@@ -228,7 +228,7 @@ class GameWindow:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        print("END GAME TRIGGERED")  # For debugging
+        #print("END GAME TRIGGERED")  # For debugging
 
         # Show final result
         Label(self.root, text=f"Game Over, {self.player_name}!", font=("Arial", 30), bg="black", fg="white").pack(pady=50)
