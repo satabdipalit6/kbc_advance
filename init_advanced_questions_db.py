@@ -1,24 +1,31 @@
 # init_advanced_questions_db.py
 
-import sqlite3
+import pymysql
 
-conn = sqlite3.connect('questions.db')
+# Establish a connection to the MySQL database
+conn = pymysql.connect(
+    host='localhost',
+    user='root',
+    password='root',
+    database='questions'
+)
 cursor = conn.cursor()
 
+# Create the 'quiz' table if it doesn't exist
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS quiz (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question TEXT NOT NULL,
-    option1 TEXT,
-    option2 TEXT,
-    option3 TEXT,
-    option4 TEXT,
-    correct_answer TEXT,
-    difficulty TEXT
-)
+    CREATE TABLE IF NOT EXISTS quiz (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        question TEXT,
+        option1 TEXT,
+        option2 TEXT,
+        option3 TEXT,
+        option4 TEXT,
+        correct_answer TEXT,
+        difficulty VARCHAR(10)
+    )
 ''')
 
-# Add questions (you should add 50+ with different difficulties)
+# List of questions to insert
 questions_data = [
     ("What is the capital of France?", "Paris", "Berlin", "Rome", "Madrid", "Paris", "Easy"),
     ("Which planet is known as the Red Planet?", "Mars", "Earth", "Venus", "Jupiter", "Mars", "Easy"),
@@ -27,10 +34,19 @@ questions_data = [
     ("What is the square root of 256?", "14", "16", "18", "20", "16", "Medium"),
     ("What is the capital of Australia?", "Sydney", "Melbourne", "Canberra", "Perth", "Canberra", "Hard"),
     ("What is the hardest natural substance?", "Gold", "Diamond", "Platinum", "Iron", "Diamond", "Hard")
-    # Add more...
+    # Add more questions as needed
 ]
 
-cursor.executemany("INSERT INTO quiz (question, option1, option2, option3, option4, correct_answer, difficulty) VALUES (?, ?, ?, ?, ?, ?, ?)", questions_data)
+# SQL statement with correct placeholders
+sql = '''
+    INSERT INTO quiz (question, optionA, optionB, optionC, optionD, correctOption, difficulty)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)'''
 
+# Execute the insertion of multiple records
+cursor.executemany(sql, questions_data)
+
+# Commit the transaction
 conn.commit()
+
+# Close the connection
 conn.close()
