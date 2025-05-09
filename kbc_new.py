@@ -175,9 +175,16 @@ class GameWindow:
         correct = self.correct_answers[self.q_index]
         options = [self.options1[self.q_index], self.options2[self.q_index],
                    self.options3[self.q_index], self.options4[self.q_index]]
+
+        # Find indices of incorrect options
         incorrect_indices = [i for i, opt in enumerate(options) if opt != correct]
+
+        # Randomly pick 2 incorrect options to disable
         for i in random.sample(incorrect_indices, 2):
-            self.buttons[i].config(state=DISABLED)
+            self.buttons[i].config(text="", state=DISABLED, bg='black', activebackground='black', relief=FLAT, highlightthickness=0, borderwidth=0)
+
+
+
 
     def use_poll(self):
         if self.used_poll: return
