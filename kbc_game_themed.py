@@ -9,6 +9,10 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from pygame import mixer
 
+
+
+
+
 class GameWindow:
 
     def __init__(self, root):
@@ -105,6 +109,7 @@ class GameWindow:
         selected = random.sample(all_questions, min(15, len(all_questions)))
         return ([q[1] for q in selected], [q[2] for q in selected], [q[3] for q in selected],
                 [q[4] for q in selected], [q[5] for q in selected], [q[6] for q in selected])
+
 
     def load_question(self):
         self.timer_running = True

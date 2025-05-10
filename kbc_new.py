@@ -66,9 +66,9 @@ class GameWindow:
             messagebox.showerror("Missing Info", "Please enter your name.")
             return
         self.clear_screen()
-        Label(self.root, text="Choose Difficulty Level", font=("Arial", 20), bg='black', fg='white').pack(pady=20)
+        Label(self.centerframe, text="Choose Difficulty Level", font=("Arial", 20), bg='black', fg='white').pack(pady=20)
         for level in ["Easy", "Medium", "Hard"]:
-            Button(self.root, text=level, font=("Arial", 16), width=15, command=lambda l=level: self.start_game(l)).pack(pady=10)
+            Button(self.centerframe, text=level, font=("Arial", 16), width=15, command=lambda l=level: self.start_game(l)).pack(pady=10)
 
     def start_game(self, difficulty):
         self.difficulty = difficulty
@@ -133,14 +133,23 @@ class GameWindow:
                 [q[4] for q in selected], [q[5] for q in selected], [q[6] for q in selected])
 
     def load_question(self):
+
+
+        # Start the timer
         self.timer_running = True
         self.seconds_left = 30
         self.update_timer()
+        # Display the question and options
         self.question_label.config(text=self.questions[self.q_index])
         options = [self.options1[self.q_index], self.options2[self.q_index],
                    self.options3[self.q_index], self.options4[self.q_index]]
         for i, btn in enumerate(self.buttons):
             btn.config(text=options[i], state=NORMAL)
+
+            # Update prize image
+        if self.q_index < len(self.prize_images):
+            self.prizelbl.config(image=self.prize_images[self.q_index])
+            self.prizelbl.image = self.prize_images[self.q_index]  # Prevent garbage collection
 
     def update_timer(self):
         if self.timer_running and self.seconds_left > 0:
@@ -189,7 +198,77 @@ class GameWindow:
     def use_poll(self):
         if self.used_poll: return
         self.used_poll = True
-        messagebox.showinfo("Audience Poll", "Audience suggests option with most votes is likely correct.")
+        #messagebox.showinfo("Audience Poll", "Audience suggests option with most votes is likely correct.")
+        self.show_audience_poll()
+
+    def show_audience_poll(self):
+        # Create a new window for the audience poll
+        poll_window = Toplevel(self.root)
+        poll_window.title("Audience Poll")
+        poll_window.geometry("400x300")
+        poll_window.configure(bg='black')
+
+
+        # Schedule the poll window to close after 5 seconds (5000 milliseconds)
+        poll_window.after(5000, poll_window.destroy)
+
+
+        # Create a canvas to draw the bar chart
+        canvas = Canvas(poll_window, width=400, height=300, bg='black', highlightthickness=0)
+        canvas.pack()
+
+        # Retrieve the current question's options and correct answer
+        options = [
+            self.options1[self.q_index],
+            self.options2[self.q_index],
+            self.options3[self.q_index],
+            self.options4[self.q_index]
+        ]
+        correct_answer = self.correct_answers[self.q_index]
+
+        # Determine the index of the correct answer
+        correct_index = options.index(correct_answer)
+
+        # Assign a higher percentage to the correct answer
+        correct_percentage = random.randint(40, 70)
+        remaining_percentage = 100 - correct_percentage
+
+        # Distribute the remaining percentage among other options
+        percentages = [0] * 4
+        percentages[correct_index] = correct_percentage
+        other_indices = [i for i in range(4) if i != correct_index]
+        for i in other_indices[:-1]:
+            val = random.randint(0, remaining_percentage)
+            percentages[i] = val
+            remaining_percentage -= val
+        percentages[other_indices[-1]] = remaining_percentage
+
+        # Define bar properties
+        bar_width = 50
+        spacing = 30
+        max_height = 150
+        x_start = 50
+        option_labels = ['A', 'B', 'C', 'D']
+        colors = ['red', 'green', 'blue', 'yellow']
+
+        # Draw the bars and labels
+        for i, percent in enumerate(percentages):
+            bar_height = (percent / 100) * max_height
+            x0 = x_start + i * (bar_width + spacing)
+            y0 = 250 - bar_height
+            x1 = x0 + bar_width
+            y1 = 250
+
+            # Draw the bar
+            canvas.create_rectangle(x0, y0, x1, y1, fill=colors[i], outline='white')
+
+            # Add the percentage label above the bar
+            canvas.create_text((x0 + x1) / 2, y0 - 10, text=f"{percent}%", fill='white', font=('Arial', 12))
+
+            # Add the option label below the bar
+            canvas.create_text((x0 + x1) / 2, y1 + 10, text=option_labels[i], fill='white', font=('Arial', 12))
+
+
 
     def use_phone(self):
         if self.used_phone: return
@@ -199,6 +278,11 @@ class GameWindow:
 
     def end_game(self):
         self.timer_running = False
+
+        # Update prize image to final level
+        if self.q_index < len(self.prize_images):
+            self.prizelbl.config(image=self.prize_images[self.q_index])
+            self.prizelbl.image = self.prize_images[self.q_index]  # Prevent garbage collection
 
         # Save game result to database
         try:
